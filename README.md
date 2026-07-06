@@ -2,7 +2,7 @@
 
 AI Support Debugging Lab is an internal-style technical support console for investigating synthetic AI voice, API, deployment, WordPress, DNS, Cloudflare, hosting, SSL, email, malware, and performance incidents. It makes the daily reasoning of a Technical Support Engineer visible: understand the report, correlate evidence, identify the root cause, document the resolution, and send a clear customer update.
 
-![AI Support Debugging Lab incident investigation interface](docs/incident-investigation.png)
+![AI Support Debugging Lab incident investigation interface](docs/incident-investigation.jpg)
 
 ## Project overview
 
@@ -11,7 +11,7 @@ The lab contains 42 production scenarios spanning AI products and web infrastruc
 ## Features
 
 - AI voice support and conversational-agent scenarios
-- API, webhook, OpenAI, and Fly.io deployment troubleshooting
+- API, webhook, OpenAI, and simulated Fly.io deployment troubleshooting
 - WordPress and managed-hosting incidents
 - DNS and Cloudflare troubleshooting
 - SSL, email, malware, and website-performance support cases
@@ -22,7 +22,7 @@ The lab contains 42 production scenarios spanning AI products and web infrastruc
 - Evidence-backed RCA with root cause, impact, resolution, technical reasoning, and prevention
 - OpenAI-assisted customer reply generation with edit, regenerate, and copy actions
 - Graceful missing-key behavior and server-only provider credentials
-- Safe provider diagnostics, Docker packaging, Fly.io health checks, and responsive UI
+- Safe provider diagnostics, Vercel rate limiting, and responsive UI
 
 ## Tech stack
 
@@ -30,7 +30,7 @@ The lab contains 42 production scenarios spanning AI products and web infrastruc
 - Tailwind CSS 4
 - Next.js route handlers and the OpenAI Responses API
 - Typed local incident data
-- Docker and Fly.io
+- Vercel deployment with server-side environment variables and WAF rate limiting
 
 ## Local setup
 
@@ -54,25 +54,12 @@ Create `.env.local` for optional local integrations. Never commit this file.
 | `OPENAI_API_KEY` | No | Generates customer replies and enables the OpenAI diagnostic |
 | `OPENAI_REPLY_MODEL` | No | Overrides the default `gpt-4.1-mini` reply model |
 | `ELEVENLABS_API_KEY` | No | Enables the safe ElevenLabs credential diagnostic |
-| `PORT` | Fly.io | Runtime port; configured as `8080` |
-| `HOSTNAME` | Fly.io | Bind address; configured as `0.0.0.0` |
 
 Provider keys are read only in server route handlers. The browser receives generated text and safe diagnostic state, never secret values.
 
-## Fly.io deployment
+## Vercel deployment
 
-The repository includes a multi-stage Dockerfile, standalone Next.js output, a non-root runtime user, and a `/healthz` endpoint that does not depend on third-party APIs.
-
-```bash
-fly launch
-fly secrets set OPENAI_API_KEY=…
-fly secrets set ELEVENLABS_API_KEY=…
-fly deploy
-fly status
-fly logs
-```
-
-The process binds to `0.0.0.0:8080`, matching `internal_port` in `fly.toml`. After deployment, verify `/healthz`, open an incident, submit an RCA, and test both configured and missing-key reply states.
+The live lab is deployed as a separate Vercel project at [ai-support-debugging-lab.vercel.app](https://ai-support-debugging-lab.vercel.app/). OpenAI credentials are stored as server-side Vercel environment variables, and the customer-reply route is protected by a production WAF rate limit. Fly.io appears in several synthetic investigation scenarios, but the application itself is not deployed to Fly.io.
 
 ## API routes
 
@@ -94,7 +81,7 @@ Recommended portfolio captures:
 7. Customer Reply panel with generate, edit, regenerate, and copy actions
 8. Project Notes page and mobile investigation view
 
-The repository includes `docs/incident-investigation.png` as the primary investigation interface preview. Add the remaining recommended captures after deployment.
+The repository includes `docs/incident-investigation.jpg` as the primary investigation interface preview. Add the remaining recommended captures as the project evolves.
 
 ## Portfolio value
 

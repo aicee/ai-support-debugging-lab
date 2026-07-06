@@ -12,7 +12,7 @@ export async function GET() {
     hasApiKey: false,
     requestId,
     result: "check_not_run",
-    diagnosticMessage: "ELEVENLABS_API_KEY is not configured. Add it as a local environment variable or Fly.io secret, then run this check again.",
+    diagnosticMessage: "ELEVENLABS_API_KEY is not configured. Add it as a local or server-side environment variable, then run this check again.",
   });
 
   try {

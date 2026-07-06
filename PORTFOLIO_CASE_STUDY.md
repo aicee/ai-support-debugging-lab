@@ -10,15 +10,15 @@ Support engineering is hard to demonstrate publicly. Real work involves confiden
 
 ## Solution
 
-I built 42 investigations across voice generation, streaming, conversational-agent tools, webhooks, OpenAI, Fly.io, WordPress, DNS, Cloudflare, hosting, SSL, email, malware, and performance. Each case asks the analyst to combine customer context with evidence from logs, requests, hosting state, DNS answers, configuration, and timelines. A completed RCA produces an internal incident report, followed by an optional OpenAI-generated customer reply that remains under analyst control.
+I built 42 investigations across voice generation, streaming, conversational-agent tools, webhooks, OpenAI, simulated Fly.io deployment failures, WordPress, DNS, Cloudflare, hosting, SSL, email, malware, and performance. Each case asks the analyst to combine customer context with evidence from logs, requests, hosting state, DNS answers, configuration, and timelines. A completed RCA produces an internal incident report, followed by an optional OpenAI-generated customer reply that remains under analyst control.
 
 ## Technical Highlights
 
-- Next.js 15, React 19, TypeScript, Tailwind CSS 4, Docker, and Fly.io
+- Next.js 15, React 19, TypeScript, Tailwind CSS 4, and Vercel
 - Typed incident records with customer context, business impact, evidence, timeline, and resolution fields
 - Server-side OpenAI Responses API integration with bounded input, timeouts, safe errors, and no client-exposed key
 - Safe ElevenLabs and OpenAI credential diagnostics that never return credential values
-- Standalone, non-root container bound to Fly.io's configured port
+- Server-side Vercel environment variables and WAF protection for OpenAI reply generation
 - Independent `/healthz` route and realistic deployment failure scenarios
 - Web-infrastructure investigations grounded in 10+ years of WordPress and hosting support work
 - Semantic Request Details and Observed Error evidence for non-API cases

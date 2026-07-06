@@ -7,7 +7,7 @@ const sections = [
   { title: "Support skills", body: "Incident triage, severity and impact assessment, log analysis, reproduction, root-cause analysis, internal incident reporting, prevention planning, and concise enterprise customer communication." },
   { title: "AI skills", body: "Troubleshooting voice generation, streaming, model compatibility, quota, authentication, conversational-agent tools, webhooks, and binary audio. OpenAI is used server-side to draft customer replies from sanitized investigation findings." },
   { title: "Web infrastructure skills", body: "WordPress, DNS, Cloudflare, hosting, SSL, email delivery, malware response, and website performance investigations grounded in more than 10 years of web hosting support experience." },
-  { title: "Deployment skills", body: "Docker and Fly.io operations, ports and health checks, memory constraints, environment isolation, secrets, deployment regressions, safe diagnostics, and production smoke testing." },
+  { title: "Deployment skills", body: "Vercel deployment, server-side environment variables, rate limiting, health checks, environment isolation, deployment regressions, safe diagnostics, and production smoke testing." },
   { title: "Future improvements", body: "Persist analyst progress, add team assignment and audit history, introduce webhook replay tools, stream sanitized live logs, add role-based access, and evaluate AI drafts for accuracy and support tone." },
 ];
 
