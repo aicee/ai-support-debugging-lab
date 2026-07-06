@@ -2,7 +2,7 @@
 
 AI Support Debugging Lab is an internal-style technical support console for investigating synthetic AI voice, API, deployment, WordPress, DNS, Cloudflare, hosting, SSL, email, malware, and performance incidents. It makes the daily reasoning of a Technical Support Engineer visible: understand the report, correlate evidence, identify the root cause, document the resolution, and send a clear customer update.
 
-![AI Support Debugging Lab incident investigation interface](docs/incident-investigation.jpg)
+![AI Support Debugging Lab incident investigation interface](https://ai-support-debugging-lab.vercel.app/incident-investigation.jpg)
 
 ## Project overview
 
@@ -81,7 +81,7 @@ Recommended portfolio captures:
 7. Customer Reply panel with generate, edit, regenerate, and copy actions
 8. Project Notes page and mobile investigation view
 
-The repository includes `docs/incident-investigation.jpg` as the primary investigation interface preview. Add the remaining recommended captures as the project evolves.
+The deployed application serves `public/incident-investigation.jpg` as the primary investigation interface preview. Add the remaining recommended captures as the project evolves.
 
 ## Portfolio value
 
