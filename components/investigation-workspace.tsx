@@ -14,6 +14,16 @@ const tabLabel = (incident: Incident, tab: Tab) => {
   return tab;
 };
 
+const tabFromLabel = (incident: Incident, label: string): Tab | null => {
+  const normalized = label.toLowerCase();
+  return tabs.find((tab) => tab.toLowerCase() === normalized || tabLabel(incident, tab).toLowerCase() === normalized) ?? null;
+};
+
+const suggestedReviewTabs = (incident: Incident) => {
+  if (incident.suggestedReviewTabs?.length) return incident.suggestedReviewTabs.slice(0, 3);
+  return ["Logs", tabLabel(incident, "API Response"), "Timeline"];
+};
+
 function Evidence({ incident, active }: { incident: Incident; active: Tab }) {
   if (active === "Customer") return <div className="space-y-7"><div><div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#69727e]">Customer message</div><blockquote className="whitespace-pre-line border-l-2 border-[#b7f36b] pl-4 text-sm leading-7 text-[#d9dde2]">{incident.customerMessage}</blockquote></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{Object.entries({ Customer: incident.customerContext.customer, Plan: incident.customerContext.plan, Environment: incident.customerContext.environment, "Affected users": incident.customerContext.affectedUsers, Region: incident.customerContext.region, Started: incident.customerContext.started }).map(([label, value]) => <div key={label} className="rounded-md border border-[#242b34] bg-[#0a0d11] p-3"><div className="mono text-[9px] uppercase tracking-wider text-[#68717d]">{label}</div><div className="mt-1.5 text-xs font-medium text-[#d2d7dd]">{value}</div></div>)}</div><div><div className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#69727e]">Reported impact</div><p className="text-sm leading-6 text-[#aab1bb]">{incident.customerImpact}</p></div></div>;
   if (active === "Timeline") return <div className="space-y-0">{incident.timeline.map((item, index) => <div key={item.time} className="relative flex gap-4 pb-7 last:pb-0"><div className="relative z-10 mt-1.5 size-2 shrink-0 rounded-full bg-[#b7f36b] shadow-[0_0_0_4px_rgba(183,243,107,.08)]" />{index < incident.timeline.length - 1 && <div className="absolute left-[3px] top-4 h-full w-px bg-[#2b313a]" />}<div><div className="mono text-[11px] text-[#77808c]">{item.time}</div><div className="mt-1 text-sm text-[#d7dbe0]">{item.event}</div></div></div>)}</div>;
@@ -47,9 +57,15 @@ export function InvestigationWorkspace({ incident }: { incident: Incident }) {
   const [replyError, setReplyError] = useState("");
   const [editing, setEditing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [hintOpen, setHintOpen] = useState(false);
   const correct = selected === incident.correctAnswer;
   const submit = () => { if (selected !== null) { setSubmitted(true); setTimeout(() => document.getElementById("summary")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50); } };
-  const reset = () => { setSelected(null); setSubmitted(false); };
+  const reset = () => { setSelected(null); setSubmitted(false); setHintOpen(false); setReplyOpen(false); };
+  const reviewEvidenceAgain = () => {
+    const firstReviewTab = tabFromLabel(incident, suggestedReviewTabs(incident)[0] ?? "Logs");
+    if (firstReviewTab) setActive(firstReviewTab);
+    setTimeout(() => document.getElementById("evidence-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
   const generateReply = async () => {
     setReplyOpen(true); setGenerating(true); setReplyError(""); setEditing(false);
     try {
@@ -64,7 +80,7 @@ export function InvestigationWorkspace({ incident }: { incident: Incident }) {
 
   return (
     <>
-      <section className="panel overflow-hidden rounded-lg">
+      <section id="evidence-tabs" className="panel scroll-mt-20 overflow-hidden rounded-lg">
         <div className="scrollbar flex overflow-x-auto border-b border-[#242a33] bg-[#0b0e12] px-2">
           {tabs.map((tab) => <button key={tab} onClick={() => setActive(tab)} className={`focus-ring relative shrink-0 px-4 py-3.5 text-xs font-medium transition ${active === tab ? "text-white" : "text-[#747d89] hover:text-[#c4cad1]"}`}>{tabLabel(incident, tab)}{active === tab && <span className="absolute inset-x-3 bottom-0 h-px bg-[#b7f36b]" />}</button>)}
         </div>
@@ -80,14 +96,14 @@ export function InvestigationWorkspace({ incident }: { incident: Incident }) {
         <div className="mt-6 grid gap-3">
           {incident.choices.map((choice, index) => {
             const isSelected = selected === index;
-            const answerState = submitted && (index === incident.correctAnswer ? "correct" : isSelected ? "wrong" : "idle");
+            const answerState = submitted && (correct && index === incident.correctAnswer ? "correct" : !correct && isSelected ? "wrong" : "idle");
             return <button key={choice} disabled={submitted} onClick={() => setSelected(index)} className={`focus-ring flex items-center gap-3 rounded-md border p-4 text-left text-sm transition ${answerState === "correct" ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-100" : answerState === "wrong" ? "border-red-500/50 bg-red-500/10 text-red-100" : isSelected ? "border-[#b7f36b]/60 bg-[#b7f36b]/8 text-white" : "border-[#29303a] bg-[#0b0e12] text-[#aeb5be] hover:border-[#414a56] hover:text-white"}`}><span className={`mono grid size-6 shrink-0 place-items-center rounded border text-[10px] ${isSelected ? "border-[#b7f36b]/50 text-[#b7f36b]" : "border-[#343c47] text-[#737c88]"}`}>{String.fromCharCode(65 + index)}</span><span className="flex-1">{choice}</span>{answerState === "correct" && <Check size={16} />}{answerState === "wrong" && <X size={16} />}</button>;
           })}
         </div>
         <div className="mt-5 flex justify-end">{submitted ? <button onClick={reset} className="focus-ring flex items-center gap-2 rounded-md border border-[#333b46] px-4 py-2.5 text-xs font-semibold text-[#b5bdc7] hover:text-white"><RotateCcw size={14} /> Review again</button> : <button onClick={submit} disabled={selected === null} className="focus-ring flex items-center gap-2 rounded-md bg-[#b7f36b] px-4 py-2.5 text-sm font-semibold text-[#10140b] transition hover:bg-[#c6ff7e] disabled:cursor-not-allowed disabled:opacity-35">Submit analysis <ChevronRight size={15} /></button>}</div>
       </section>
 
-      {submitted && <section id="summary" className="mt-6 scroll-mt-20 overflow-hidden rounded-lg border border-[#33402d] bg-[#0e130d]">
+      {submitted && correct && <section id="summary" className="mt-6 scroll-mt-20 overflow-hidden rounded-lg border border-[#33402d] bg-[#0e130d]">
         <div className="flex items-center gap-3 border-b border-[#2a3526] px-5 py-4 sm:px-7"><span className={`grid size-8 place-items-center rounded-full ${correct ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"}`}>{correct ? <Check size={17} /> : <AlertTriangle size={17} />}</span><div><div className="text-sm font-semibold text-white">{correct ? "Analysis confirmed" : "Review the evidence"}</div><div className="text-xs text-[#85907f]">{correct ? "Your diagnosis matches the incident findings." : "The report below explains the evidence-supported cause."}</div></div></div>
         <div className="p-5 sm:p-7">
           <div className="mono mb-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#b7f36b]">Investigation Summary</div>
@@ -103,11 +119,40 @@ export function InvestigationWorkspace({ incident }: { incident: Incident }) {
         </div>
       </section>}
 
-      {submitted && <section className="panel mt-6 rounded-lg p-5 sm:p-7">
+      {submitted && !correct && <section id="summary" className="mt-6 scroll-mt-20 overflow-hidden rounded-lg border border-amber-500/25 bg-amber-500/5">
+        <div className="flex items-center gap-3 border-b border-amber-500/20 px-5 py-4 sm:px-7"><span className="grid size-8 place-items-center rounded-full bg-amber-500/15 text-amber-300"><AlertTriangle size={17} /></span><div><div className="text-sm font-semibold text-white">Review the evidence</div><div className="text-xs text-[#a89160]">Your selected diagnosis does not match the incident findings yet.</div></div></div>
+        <div className="p-5 sm:p-7">
+          <p className="max-w-3xl text-sm leading-6 text-[#d2c7a6]">Your selected diagnosis does not match the incident findings yet. Re-check the evidence before sending a customer-ready update.</p>
+          <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+            <div className="rounded-md border border-amber-500/20 bg-[#0b0e12] p-4">
+              <ReportLabel>Selected diagnosis</ReportLabel>
+              <p className="text-sm leading-6 text-[#e4dcc0]">{selected !== null ? incident.choices[selected] : "No diagnosis selected."}</p>
+            </div>
+            <div className="rounded-md border border-amber-500/20 bg-[#0b0e12] p-4">
+              <ReportLabel>Suggested next steps</ReportLabel>
+              <ul className="space-y-2">
+                {suggestedReviewTabs(incident).map((tab) => (
+                  <li key={tab} className="flex gap-2 text-sm leading-6 text-[#c9c1aa]"><span className="mt-2.5 size-1 shrink-0 rounded-full bg-amber-300" />Re-check the {tab} tab.</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          {hintOpen && <div className="mt-5 rounded-md border border-[#3d4652] bg-[#0b0e12] p-4">
+            <ReportLabel>Hint</ReportLabel>
+            <p className="text-sm leading-6 text-[#c9d0d8]">{incident.wrongAnswerHint ?? "Look for the clue that explains the full failure pattern across more than one evidence tab."}</p>
+          </div>}
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button onClick={reviewEvidenceAgain} className="focus-ring inline-flex items-center gap-2 rounded-md bg-[#b7f36b] px-4 py-2.5 text-sm font-semibold text-[#10140b] transition hover:bg-[#c6ff7e]"><RotateCcw size={14} /> Review Evidence Again</button>
+            <button onClick={() => setHintOpen((value) => !value)} className="focus-ring inline-flex items-center gap-2 rounded-md border border-[#333b46] px-4 py-2.5 text-xs font-semibold text-[#b5bdc7] hover:text-white"><AlertTriangle size={14} /> {hintOpen ? "Hide Hint" : "Show Hint"}</button>
+          </div>
+        </div>
+      </section>}
+
+      {submitted && correct && <section className="panel mt-6 rounded-lg p-5 sm:p-7">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center"><div><div className="mono mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b7f36b]">Investigation Complete</div><h2 className="text-xl font-semibold tracking-tight">Actions</h2><p className="mt-1 text-sm text-[#7f8894]">Turn the technical findings into a concise, customer-ready update.</p></div><button onClick={generateReply} disabled={generating} className="focus-ring inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-[#b7f36b] px-4 py-2.5 text-sm font-semibold text-[#10140b] transition hover:bg-[#c6ff7e] disabled:opacity-60">{generating ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />} Generate Customer Reply</button></div>
       </section>}
 
-      {submitted && replyOpen && <section className="mt-6 overflow-hidden rounded-lg border border-[#2d3742] bg-[#0d1116]">
+      {submitted && correct && replyOpen && <section className="mt-6 overflow-hidden rounded-lg border border-[#2d3742] bg-[#0d1116]">
         <div className="flex items-center gap-2 border-b border-[#252c35] px-5 py-4 sm:px-7"><MessageSquareText size={16} className="text-[#b7f36b]" /><h2 className="text-sm font-semibold">Customer Reply</h2><span className="mono ml-auto text-[9px] uppercase tracking-wider text-[#65707c]">AI-assisted · analyst reviewed</span></div>
         <div className="p-5 sm:p-7">
           {generating && <div className="flex min-h-44 items-center justify-center gap-3 text-sm text-[#8e97a2]"><Loader2 size={17} className="animate-spin text-[#b7f36b]" /> Drafting a customer-safe response…</div>}

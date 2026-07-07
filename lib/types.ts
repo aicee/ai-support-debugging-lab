@@ -52,6 +52,8 @@ export interface Incident {
   notes: string;
   choices: string[];
   correctAnswer: number;
+  wrongAnswerHint?: string;
+  suggestedReviewTabs?: string[];
   explanation: string;
   investigationSummary: InvestigationSummary;
   prevention: string;
