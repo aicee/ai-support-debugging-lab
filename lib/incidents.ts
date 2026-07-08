@@ -1,10 +1,11 @@
 import type { Incident } from "./types";
+import { distributeCorrectAnswer } from "./answer-options";
 import { webInfrastructureIncidents } from "./web-incidents";
 
 type IncidentInput = Omit<Incident, "status" | "level" | "deploymentDetails" | "environmentDetails" | "timeline" | "notes" | "customerContext" | "businessImpact"> &
   Partial<Pick<Incident, "deploymentDetails" | "environmentDetails" | "timeline" | "notes" | "customerContext" | "businessImpact">>;
 
-const build = (incident: IncidentInput): Incident => ({
+const build = (incident: IncidentInput): Incident => distributeCorrectAnswer({
   status: "Open",
   level: incident.difficulty,
   deploymentDetails: "Runtime: Node.js 20\nRegion: iad\nRelease: v42\nDeployment status: successful",

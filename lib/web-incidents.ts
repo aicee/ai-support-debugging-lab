@@ -1,3 +1,4 @@
+import { distributeCorrectAnswer } from "./answer-options";
 import type { Incident } from "./types";
 
 type WebIncidentInput = Omit<
@@ -9,7 +10,7 @@ type WebIncidentInput = Omit<
   context?: Partial<Incident["customerContext"]>;
 };
 
-const webIncident = ({ context, ...incident }: WebIncidentInput): Incident => ({
+const webIncident = ({ context, ...incident }: WebIncidentInput): Incident => distributeCorrectAnswer({
   ...incident,
   status: "Open",
   level: incident.difficulty,
