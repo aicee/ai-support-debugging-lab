@@ -25,6 +25,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </div>
         </header>
         {children}
+        <footer className="site-footer">
+          Built and maintained by{" "}
+          <a
+            href="https://aicee.vercel.app/"
+            className="focus-ring rounded-sm transition-colors hover:text-[#b7f36b]"
+          >
+            aicee<span className="footer-cursor" aria-hidden="true">_</span>
+          </a>
+        </footer>
       </body>
     </html>
   );
