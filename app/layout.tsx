@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Analytics } from "@vercel/analytics/next";
 import { Activity, Github } from "lucide-react";
 import "./globals.css";
 
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             aicee<span className="footer-cursor" aria-hidden="true">_</span>
           </a>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
